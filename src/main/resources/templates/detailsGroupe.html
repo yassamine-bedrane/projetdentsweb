@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" th:href="@{/index.css}"/>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
+    <title>Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        p {
+            margin-bottom: 10px;
+        }
+
+        img {
+            max-width: 200px;
+            max-height: 200px;
+        }
+
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .details-table th, .details-table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .details-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h4 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .student-details {
+            margin-left: 20px;
+        }
+
+        /* Ajout de nouvelles classes Bootstrap */
+        .container {
+            margin-top: 50px;
+        }
+
+        .accordion-button {
+            background-color: #024788;
+            color: white;
+        }
+
+        .accordion-item {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .accordion-body {
+            padding: 16px;
+        }
+
+        .btn-link {
+            color: #024788;
+        }
+
+        .btn-link:hover {
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+<div class="w3-sidebar w3-bar-block w3-card w3-animate-left" style="display:none; width: 70px" id="mySidebar">
+    <br>
+    <button class="w3-bar-item w3-button w3-large"
+            onclick="w3_close()">Fermer &times;
+    </button>
+    <hr class="my-4">
+    <a href="/profile" th:if="${#authorization.expression('hasRole(''ROLE_PROF'')')}"
+       class="w3-bar-item w3-button w3-hover-teal"><i class="fa fa-pencil fa-fw"></i> Profile</a>
+    <a href="/app/tooths" th:if="${#authorization.expression('hasRole(''ROLE_PROF'')')}"
+       class="w3-bar-item w3-button w3-hover-teal"><img th:src="@{/images/denticon.png}" class="dent"
+                                                        style="width:13px"> Gestion des Dents</a>
+    <a href="/app/pws" th:if="${#authorization.expression('hasRole(''ROLE_PROF'')')}"
+       class="w3-bar-item w3-button w3-hover-teal"><i class="fa fa-flask fa-fw"></i> Gestion des Travaux Pratiques</a>
+    <a href="/app/students" th:if="${#authorization.expression('hasRole(''ROLE_PROF'')')}"
+       class="w3-bar-item w3-button w3-hover-teal"><i class="fa fa-graduation-cap fa-fw"></i> Gestion des Etudiants</a>
+    <a href="/app/professors" th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}"
+       class="w3-bar-item w3-button w3-hover-teal"> <i class="fa fa-user-md"></i> Gestion des Professeurs</a>
+
+    <a href="/app/admins" th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}"
+       class="w3-bar-item w3-button w3-hover-teal"><i class="fa fa-user"></i> Gestion des Admins</a>
+    <a href="/app/groupes" th:if="${#authorization.expression('hasRole(''ROLE_PROF'')')}"
+       class="w3-bar-item w3-button w3-hover-teal"> <i class="fa fa-users fa-fw"></i> Gestion des groupes</a>
+    <hr class="my-4">
+
+    <a href="/logout" class="w3-bar-item w3-button w3-hover-black"><i class="fa fa-sign-out"></i> Déconnexion</a>
+
+</div>
+<div id="main">
+
+    <div class="w3-teal">
+        <button id="openNav" class="w3-button w3-teal w3-xlarge" onclick="w3_open()">&#9776;</button>
+        <div class="w3-container">
+        </div>
+    </div>
+    <div class="w3-container">
+        <div class="container mt-5">
+            <h2 class="mb-3">Détails</h2>
+            <table class="table details-table">
+                <tr>
+                    <th>Code</th>
+                    <td th:text="${code}"></td>
+                </tr>
+                <tr>
+                    <th>Year</th>
+                    <td th:text="${year}"></td>
+                </tr>
+                <tr>
+                    <th>Professor</th>
+                    <td th:text="${professor.getFirstName()}+' '+${professor.getLastName()}"></td>
+                </tr>
+            </table>
+            <h4>Students</h4>
+            <div class="accordion" id="studentsAccordion">
+                <div th:each="student, stat : ${students}">
+                    <div class="card">
+                        <div class="card-header" th:id="'studentHeading' + ${stat.index}">
+                            <h2 class="mb-0">
+                                <button class="btn btn-link" type="button" data-bs-toggle="collapse"
+                                        th:data-bs-target="'#studentCollapse' + ${stat.index}"
+                                        aria-expanded="true" th:aria-controls="'studentCollapse' + ${stat.index}">
+                                    <div class="text-center">
+                                        <strong>
+                                            <div>Nom et Prénom :</div>
+                                        </strong>
+                                        <span th:text="${student.getFirstName()} + ' ' + ${student.getLastName()}"></span>
+                                    </div>
+                                </button>
+                            </h2>
+                        </div>
+                        <div th:id="'studentCollapse' + ${stat.index}" class="collapse "
+                             aria-labelledby="'studentHeading' + ${stat.index}"
+                             th:data-bs-parent="'#studentsAccordion'">
+                            <div class="card-body">
+                                <ul th:if="${not #lists.isEmpty(student.studentpws)}" class="student-details accordion">
+                                    <li th:each="studentpw, pwStat : ${student.studentpws}">
+                                        <div class="accordion"
+                                             th:id="'studentPWAccordion' + ${stat.index} + '_tp' + ${pwStat.index}">
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header"
+                                                    th:id="'studentHeading' + ${stat.index} + '_tp' + ${pwStat.index}">
+                                                    <button class="accordion-button" type="button"
+                                                            data-bs-toggle="collapse"
+                                                            th:data-bs-target="'#studentCollapse' + ${stat.index} + '_tp' + ${pwStat.index}"
+                                                            aria-expanded="true"
+                                                            th:aria-controls="'studentCollapse' + ${stat.index} + '_tp' + ${pwStat.index}">
+                                                        <strong>
+                                                            <div>TP:</div>
+                                                        </strong>
+                                                        <span th:text="${studentpw.pk.pw.title}"></span>
+                                                    </button>
+                                                </h2>
+                                                <div th:id="'studentCollapse' + ${stat.index} + '_tp' + ${pwStat.index}"
+                                                     class="accordion-collapse collapse "
+                                                     aria-labelledby="'studentHeading' + ${stat.index} + '_tp' + ${pwStat.index}"
+                                                     th:data-bs-parent="'#studentPWAccordion' + ${stat.index}">
+                                                    <div class="accordion-body">
+                                                        <div class="row">
+                                                            <div class="col-md-6">
+                                                                <table class="table table-borderless">
+                                                                    <tbody>
+                                                                    <tr>
+                                                                        <th scope="row"><strong>Objectif:</strong></th>
+                                                                        <td>
+                                                                            <p th:text="${studentpw.pk.pw.objectif}"></p>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th scope="row"><strong>Docs:</strong></th>
+                                                                        <td><p th:text="${studentpw.pk.pw.docs}"></p>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th scope="row"><strong>Dent:</strong></th>
+                                                                        <td>
+                                                                            <p th:text="${studentpw.pk.pw.tooth.name}"></p>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th scope="row"><strong>Date:</strong></th>
+                                                                        <td><p th:text="${studentpw.date}"></p></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th scope="row"><strong>Time:</strong></th>
+                                                                        <td><p th:text="${studentpw.time}"></p></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th scope="row"><strong>Note:</strong></th>
+                                                                        <td><p th:text="${studentpw.note}"></p></td>
+                                                                    </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <strong>Les images des dents:</strong>
+                                                                <div th:each="img : ${studentpw.imagesList}">
+                                                                    <img th:if="${img.imageFront != null}"
+                                                                         th:src="@{'/app/imagess/image/' + ${img.id}}"
+                                                                         class="img-thumbnail"
+                                                                         style="width: 200px; height: auto;"
+                                                                         alt="Angle Image"/>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <button type="button" class="btn btn-primary"
+                                                                data-bs-toggle="modal"
+                                                                th:data-bs-target="'#updateNoteModal' + ${stat.index}">
+                                                            Ajouter la note
+                                                        </button>
+                                                        <div class="modal fade" th:id="'updateNoteModal' + ${stat.index}" tabindex="-1" role="dialog"
+                                                             aria-labelledby="updateNoteModalLabel" aria-hidden="true">
+                                                            <div class="modal-dialog" role="document">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title" id="updateNoteModalLabel">Ajouter la note</h5>
+                                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <form th:action="@{'/app/studentpws/update/' + ${studentpw.pk.student.id} + '/' + ${studentpw.pk.pw.id}}"
+                                                                              method="post">
+                                                                            <div class="mb-3">
+                                                                                <label for="note" class="form-label">Note:</label>
+                                                                                <input type="text" class="form-control" id="note" name="note" th:value="${studentpw.note}">
+                                                                            </div>
+                                                                            <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                                                        </form>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <div th:if="${#lists.isEmpty(student.studentpws)}">
+                                    <span>Aucun PW pour cet étudiant</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${#lists.isEmpty(students)}">
+                    <span>Pas d'étudiant dans ce groupe</span>
+                </div>
+            </div>
+
+        </div>
+        <br><br>
+        <div th:replace="fragments/footer :: footer"></div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+<script>
+    function w3_open() {
+        document.getElementById("main").style.marginLeft = "25%";
+        document.getElementById("mySidebar").style.width = "20%";
+        document.getElementById("mySidebar").style.display = "block";
+        document.getElementById("openNav").style.display = 'none';
+    }
+
+    function w3_close() {
+        document.getElementById("main").style.marginLeft = "0%";
+        document.getElementById("mySidebar").style.display = "none";
+        document.getElementById("openNav").style.display = "inline-block";
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        w3_open();
+    });
+</script>
+
+</body>
+
+</html>

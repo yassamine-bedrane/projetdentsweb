@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clients</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/index.css}"/>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+</head>
+<body>
+<div class="w3-sidebar w3-bar-block w3-card w3-animate-left" style="display:none; width: 70px" id="mySidebar">
+    <br>
+    <button class="w3-bar-item w3-button w3-large"
+            onclick="w3_close()">Fermer &times;
+    </button>
+    <hr class="my-4">    <a href="/profile" th:if="${#authorization.expression('hasRole(''ROLE_PROF'')')}"
+       class="w3-bar-item w3-button w3-hover-teal"><i class="fa fa-pencil fa-fw"></i> Profile</a>
+    <a href="/app/tooths" th:if="${#authorization.expression('hasRole(''ROLE_PROF'')')}"
+       class="w3-bar-item w3-button w3-hover-teal"><img th:src="@{/images/denticon.png}" class="dent"
+                                                        style="width:13px"> Gestion des Dents</a>
+    <a href="/app/pws" th:if="${#authorization.expression('hasRole(''ROLE_PROF'')')}"
+       class="w3-bar-item w3-button w3-hover-teal"><i class="fa fa-flask fa-fw"></i> Gestion des Travaux Pratiques</a>
+    <a href="/app/students" th:if="${#authorization.expression('hasRole(''ROLE_PROF'')')}"
+       class="w3-bar-item w3-button w3-hover-teal"><i class="fa fa-graduation-cap fa-fw"></i> Gestion des Etudiants</a>
+    <a href="/app/professors" th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}"
+       class="w3-bar-item w3-button w3-hover-teal"> <i class="fa fa-user-md"></i> Gestion des Professeurs</a>
+
+    <a href="/app/admins" th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}"
+       class="w3-bar-item w3-button w3-hover-teal"><i class="fa fa-user"></i> Gestion des Admins</a>
+    <a href="/app/groupes" th:if="${#authorization.expression('hasRole(''ROLE_PROF'')')}"
+       class="w3-bar-item w3-button w3-hover-teal"> <i class="fa fa-users fa-fw"></i> Gestion des groupes</a>
+    <hr class="my-4">
+    <a href="/logout" class="w3-bar-item w3-button w3-hover-black"><i class="fa fa-sign-out"></i> Déconnexion</a>
+
+</div>
+
+<div id="main">
+
+    <div class="w3-teal">
+        <button id="openNav" class="w3-button w3-teal w3-xlarge" onclick="w3_open()">&#9776;</button>
+        <div class="w3-container">
+        </div>
+    </div>
+    <div class="w3-container">
+
+        <div class="container mt-5 form-container">
+            <div class="card mx-auto" style="max-width: 1000px;">
+                <div class="card-body">
+                    <h2 class="text-center mb-4 card-header">Ajouter un TP</h2>
+                    <form th:action="@{/app/pws}" method="post" th:object="${pw}" class="center-form">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="title" class="form-label">Title:</label>
+                                <input type="text" th:field="*{title}" class="form-control" id="title" required/>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="objectif" class="form-label">Objectif:</label>
+                                <input type="text" th:field="*{objectif}" class="form-control" id="objectif" required/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="docs" class="form-label">Docs:</label>
+                                <input type="text" th:field="*{docs}" class="form-control" id="docs" required/>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="tooth" class="form-label">Tooth:</label>
+                                <select th:field="*{tooth}" class="form-control" id="tooth">
+                                    <option value="" selected disabled>Select a Tooth</option>
+                                    <option th:each="toothOption : ${tooths}" th:value="${toothOption.id}"
+                                            th:text="${toothOption.name}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="groupes" class="form-label">Groupes:</label>
+                                <select th:field="*{groups}" class="form-control" id="groupes" multiple="multiple">
+                                    <option value="" selected disabled>Selectionnez les groupes</option>
+                                    <option th:each="grps : ${groupes}" th:value="${grps.id}"
+                                            th:text="${grps.code}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="background-color: #024788 !important;">
+                            Ajouter
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <hr class="my-4">
+
+            <div th:if="${not #strings.isEmpty(success)}" class="alert alert-success">
+                <p th:text="${success}"></p>
+            </div>
+            <div th:if="${not #strings.isEmpty(error)}" class="alert alert-danger">
+                <p th:text="${error}"></p>
+            </div>
+
+
+            <h2 class="text-center mb-4">Liste des TPs</h2>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th class="text-center align-middle" style="background-color: teal; color: white">Nº</th>
+                    <th class="text-center align-middle" style="background-color: teal; color: white">Title</th>
+                    <th class="text-center align-middle" style="background-color: teal; color: white">Objectif</th>
+                    <th class="text-center align-middle" style="background-color: teal; color: white">Docs</th>
+                    <th class="text-center align-middle" style="background-color: teal; color: white">Tooth</th>
+                    <th class="text-center align-middle" style="background-color: teal; color: white">Groupes</th>
+                    <th class="text-center align-middle" style="background-color: teal; color: white">Modifier</th>
+                    <th class="text-center align-middle" style="background-color: teal; color: white">Supprimer</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="pw : ${pws}">
+                    <td class="text-center align-middle" th:text="${pw.id}"></td>
+                    <td class="text-center align-middle" th:text="${pw.title}"></td>
+                    <td class="text-center align-middle" th:text="${pw.objectif}"></td>
+                    <td class="text-center align-middle" th:text="${pw.docs}"></td>
+                    <td class="text-center align-middle" th:text="${pw.tooth.getName()}"></td>
+                    <td class="text-center align-middle">
+                        <div th:each="group : ${pw.groups}" th:text="${group.getCode()}"></div>
+                    </td>
+
+                    <td class="text-center align-middle">
+                        <a th:href="@{/app/pws/edit/{id}(id=${pw.id})}" class="btn btn-outline-secondary">Modifier
+                        </a>
+                    </td>
+                    <td class="text-center align-middle">
+                        <a href="#" th:attr="onclick='confirmDelete(\'' + ${pw.id} + '\')'" class="btn btn-outline-danger">Supprimer
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Confirmation</h5>
+
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            Êtes-vous sûr de vouloir supprimer ce TP?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <a id="confirmDelete" href="#" class="btn btn-danger">Supprimer</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        <br><br>
+        <div th:replace="fragments/footer :: footer"></div>
+    </div>
+</div>
+<script th:inline="javascript">
+
+    function confirmDelete(id) {
+        var deleteLink = '/app/pws/delete/' + id;
+        document.getElementById('confirmDelete').setAttribute('href', deleteLink);
+
+        var myModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+        myModal.show();
+    }
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+
+<script>
+    function w3_open() {
+        document.getElementById("main").style.marginLeft = "25%";
+        document.getElementById("mySidebar").style.width = "20%";
+        document.getElementById("mySidebar").style.display = "block";
+        document.getElementById("openNav").style.display = 'none';
+    }
+
+    function w3_close() {
+        document.getElementById("main").style.marginLeft = "0%";
+        document.getElementById("mySidebar").style.display = "none";
+        document.getElementById("openNav").style.display = "inline-block";
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        w3_open();
+    });
+</script>
+
+</body>
+</html>
